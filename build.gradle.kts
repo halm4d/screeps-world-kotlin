@@ -22,11 +22,16 @@ val screepsPassword: String? by project
 val screepsToken: String? by project
 val screepsHost: String? by project
 val screepsBranch: String? by project
-val screepsSkipSslVerify: Boolean? by project
+val screepsSkipSslVerify: String? by project
 val branch = screepsBranch ?: "default"
 val host = screepsHost ?: "https://screeps.com"
 val minifiedJsDirectory: String = File(buildDir, "minified-js").absolutePath
-val skipSsl = screepsSkipSslVerify ?: false
+val skipSsl = screepsSkipSslVerify?.let {
+    when (it.toLowerCase()) {
+        "true", "1" -> true
+        else -> false
+    }
+} ?: false
 
 kotlin {
     js {
@@ -109,9 +114,12 @@ tasks.register("deploy") {
             ctx.init(null, arrayOf(TrustAllTrustManager) , SecureRandom())
             HttpsURLConnection.setDefaultSSLSocketFactory(ctx.socketFactory)
         }
-        val connection: HttpsURLConnection = url.openConnection() as HttpsURLConnection
+        val connection: java.net.HttpURLConnection
         if(skipSsl){
-            connection.hostnameVerifier = HostnameVerifier { _, _ -> true } // accept all
+            connection = url.openConnection() as java.net.HttpURLConnection
+//            connection.hostnameVerifier = HostnameVerifier { _, _ -> true } // accept all
+        } else {
+            connection = url.openConnection() as HttpsURLConnection
         }
         connection.doOutput = true
         connection.requestMethod = "POST"
