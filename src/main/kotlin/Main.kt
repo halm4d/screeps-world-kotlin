@@ -1,4 +1,11 @@
-import starter.gameLoop
+import ai.gameLoop
+
+@Suppress("unused")
+private object Traveler {
+    init {
+        js("var Traveler = require('Traveler');")
+    }
+}
 
 /**
  * Entry point
@@ -8,5 +15,6 @@ import starter.gameLoop
  */
 @Suppress("unused")
 fun loop() {
+    Traveler
     gameLoop()
 }

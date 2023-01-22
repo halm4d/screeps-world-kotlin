@@ -1,4 +1,4 @@
-package starter
+package ai
 
 
 import screeps.api.*
@@ -60,9 +60,8 @@ fun gameLoop() {
     for ((_, creep) in Game.creeps) {
         when (creep.memory.role) {
             Role.HARVESTER -> creep.harvest()
-            Role.BUILDER -> creep.build()
             Role.UPGRADER -> creep.upgrade(mainSpawn.room.controller!!)
-            else -> creep.pause()
+            else -> {}
         }
     }
 

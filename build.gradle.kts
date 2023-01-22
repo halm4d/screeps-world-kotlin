@@ -43,7 +43,9 @@ kotlin {
                     outputDirectory = minifiedJsDirectory
                 }
                 keep(
-                    "${project.name}.loop"
+                    "${project.name}.loop",
+                    "${project.name}.Traveler",
+                    "Traveler"
                 )
             }
 
@@ -92,6 +94,7 @@ tasks.register("deploy") {
             ?: throw IllegalStateException("Could not find js file corresponding to main module in ${minifiedCodeLocation.absolutePath}. Was looking for ${project.name}.js")
         val modules = mutableMapOf<String, String>()
         modules["main"] = main.readText()
+        modules["Traveler"] = File(projectDir, "js-libs/traveler/Traveler.js").readText()
         modules.putAll(otherModules.associate { it.nameWithoutExtension to it.readText() })
         val uploadContent = mapOf("branch" to branch, "modules" to modules)
         val uploadContentJson = groovy.json.JsonOutput.toJson(uploadContent)
@@ -114,12 +117,11 @@ tasks.register("deploy") {
             ctx.init(null, arrayOf(TrustAllTrustManager) , SecureRandom())
             HttpsURLConnection.setDefaultSSLSocketFactory(ctx.socketFactory)
         }
-        val connection: java.net.HttpURLConnection
-        if(skipSsl){
-            connection = url.openConnection() as java.net.HttpURLConnection
-//            connection.hostnameVerifier = HostnameVerifier { _, _ -> true } // accept all
+        val connection = if(skipSsl){
+            url.openConnection() as java.net.HttpURLConnection
+    //            connection.hostnameVerifier = HostnameVerifier { _, _ -> true } // accept all
         } else {
-            connection = url.openConnection() as HttpsURLConnection
+            url.openConnection() as HttpsURLConnection
         }
         connection.doOutput = true
         connection.requestMethod = "POST"
